@@ -102,23 +102,24 @@ void LaserScanToPointCloudNode::subscriptionListenerThreadLoop()
 
   const std::chrono::milliseconds timeout(100);
   while (rclcpp::ok(context) && alive_.load()) {
-    int subscription_count = pub_->get_subscription_count() +
-      pub_->get_intra_process_subscription_count();
-    if (subscription_count > 0) {
+    // int subscription_count = pub_->get_subscription_count() +
+    //   pub_->get_intra_process_subscription_count();
+    // if (subscription_count > 0) {
       if (!sub_.getSubscriber()) {
         RCLCPP_INFO(
           this->get_logger(),
           "Got a subscriber to pointcloud, starting laserscan subscriber");
         rclcpp::SensorDataQoS qos;
         qos.keep_last(input_queue_size_);
+        qos.reliability(RMW_QOS_POLICY_RELIABILITY_RELIABLE);
         sub_.subscribe(this, "scan_in", qos.get_rmw_qos_profile());
       }
-    } else if (sub_.getSubscriber()) {
-      RCLCPP_INFO(
-        this->get_logger(),
-        "No subscribers to pointcloud, shutting down laserscan subscriber");
-      sub_.unsubscribe();
-    }
+    // } else if (sub_.getSubscriber()) {
+    //   RCLCPP_INFO(
+    //     this->get_logger(),
+    //     "No subscribers to pointcloud, shutting down laserscan subscriber");
+    //   sub_.unsubscribe();
+    // }
     rclcpp::Event::SharedPtr event = this->get_graph_event();
     this->wait_for_graph_change(event, timeout);
   }
